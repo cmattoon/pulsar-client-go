@@ -65,10 +65,7 @@ func consume(consumeArgs *ConsumeArgs, stop <-chan struct{}) {
 	b, _ = json.MarshalIndent(consumeArgs, "", "  ")
 	log.Info("Consumer config: ", string(b))
 
-	client, err := pulsar.NewClient(pulsar.ClientOptions{
-		URL: clientArgs.ServiceURL,
-	})
-
+	client, err := NewClient()
 	if err != nil {
 		log.Fatal(err)
 	}

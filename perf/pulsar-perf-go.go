@@ -41,6 +41,8 @@ var PrometheusPort int
 
 type ClientArgs struct {
 	ServiceURL string
+	AuthToken  string // JWT string
+	CACertPath string // Path to the directory containing additional trusted CA certs
 }
 
 var clientArgs ClientArgs
@@ -48,6 +50,12 @@ var clientArgs ClientArgs
 func NewClient() (pulsar.Client, error) {
 	clientOpts := pulsar.ClientOptions{
 		URL: clientArgs.ServiceURL,
+	}
+	if clientArgs.AuthToken != "" {
+		clientOpts.Authentication = pulsar.NewAuthenticationToken(clientArgs.AuthToken)
+	}
+	if clientArgs.CACertPath != "" {
+		clientOpts.TLSTrustCertsFilePath = clientArgs.CACertPath
 	}
 	return pulsar.NewClient(clientOpts)
 }
@@ -78,6 +86,9 @@ func main() {
 	flags.BoolVar(&flagDebug, "debug", false, "enable debug output")
 	flags.StringVarP(&clientArgs.ServiceURL, "service-url", "u",
 		"pulsar://localhost:6650", "The Pulsar service URL")
+
+	flags.StringVar(&clientArgs.AuthToken, "jwt", "", "JWT for authentication")
+	flags.StringVar(&clientArgs.CACertPath, "ca-cert", "", "Path to additional CA certificates to trust")
 
 	rootCmd.AddCommand(newProducerCommand())
 	rootCmd.AddCommand(newConsumerCommand())
